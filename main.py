@@ -611,5 +611,4 @@ if __name__ == "__main__":
 
     code = textwrap.dedent(code1)
     code = compile(code, "", "exec", 0, 1)
-    # dis_code(code)
     vm_value = vm.run_code(code)
