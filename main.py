@@ -607,8 +607,7 @@ code_INPLACE_ADD = """\
         """
 
 if __name__ == "__main__":
-    vm = VirtualMachine()
-
-    code = textwrap.dedent(code1)
-    code = compile(code, "", "exec", 0, 1)
+    vm = VirtualMachine()  # 创建虚拟机对象
+    code = textwrap.dedent(code1)  # 移除字符串开头的缩进
+    code = compile(code, "", "exec", 0, 1)  # 将代码编译成 code object
     vm_value = vm.run_code(code)
