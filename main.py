@@ -6,7 +6,12 @@ import types
 import inspect
 import textwrap
 
+
 Block = collections.namedtuple("Block", "type, handler, level")
+"""
+collections.namedtuple 是一个工厂函数，用于创建一个带有名字的元组子类。
+这使得你可以在创建具有固定数量的元素的集合时，使用属性访问而不是索引访问。
+"""
 
 
 class VirtualMachineError(Exception):
@@ -527,12 +532,16 @@ class Function(object):
 
 
 def make_cell(value):
-    """创造一个真实的python闭包"""
+    """
+    创造一个真实的python闭包
+    闭包允许一个函数访问创建时所在的作用域中的变量，即使这个函数在那个作用域之外被调用。
+    """
     # Thanks to Alex Gaynor for help with this bit of twistiness.
     fn = (lambda x: lambda: x)(value)  # 将value放到闭包中，避免被回收
     return fn.__closure__[0]
 
 
+# 顺序结构
 code1 = """\
     def f():
         a = 1
@@ -542,19 +551,8 @@ code1 = """\
     f()
         """
 
+# 分支结构
 code2 = """\
-    def accumulation(n):
-        sum = 0
-        i = 1
-        while i <= 100:
-            sum = sum + i
-            i = i + 1
-        return sum
-    result = accumulation(100)
-    print(result)
-        """
-
-code3 = """\
     def compare(a,b):
         if a > b:
             print('a is bigger than b.')
@@ -568,11 +566,37 @@ code3 = """\
     compare(a, b)        
         """
 
-# code4 会报错 __main__.VirtualMachineError: unsupported bytecode type: INPLACE_ADD
+# 循环结构
+code3 = """\
+    def accumulation(n):
+        sum = 0
+        i = 1
+        while i <= 100:
+            sum = sum + i
+            i = i + 1
+        return sum
+    result = accumulation(100)
+    print(result)
+        """
+
+# 函数嵌套调用
+code4 = """\
+    def bar(y):
+        z = y + 3
+        return z
+    def foo():
+        a = 1
+        b = 2
+        return a + bar(b)
+    result = foo()
+    print(result)
+        """
+
+# code_INPLACE_ADD 会报错 __main__.VirtualMachineError: unsupported bytecode type: INPLACE_ADD
 # 因为运算中并没有提供 INPLACE_ADD 这个运算方法
 # Byterun 解释器作为一个教学工具，并没有实现所有的 Python 字节码指令，特别是一些更高级的操作，如原地操作（in-place operations）。
 # 原地操作是 Python 语言中性能优化的一部分，它们允许某些操作直接在对象上执行，而不是创建新的数据结构。
-code4 = """\
+code_INPLACE_ADD = """\
     def accumulation(n):
         sum = 0
         for i in range(101)
@@ -589,4 +613,3 @@ if __name__ == "__main__":
     code = compile(code, "", "exec", 0, 1)
     # dis_code(code)
     vm_value = vm.run_code(code)
-  
